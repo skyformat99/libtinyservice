@@ -12,11 +12,13 @@ RM=-rm -rf
 SRCS+=$(wildcard src/*.cpp)
 OBJS=$(SRCS:%.cpp=%.o)
 DEPENDS=$(SRCS:%.cpp=%.d)
+TARGET:=libtinyservice.so
+HEADER_DIR:=/usr/local/include/tinyservice
 
 
-all:libtinyservice.so
+all:$(TARGET)
 
-libtinyservice.so:$(OBJS)
+$(TARGET):$(OBJS)
 	$(CXX) -shared -fPIC -o $@ $^ $(LDFLAGS)
 
 $(OBJS):%.o:%.cpp
@@ -31,8 +33,18 @@ $(DEPENDS):%.d:%.cpp
 	sed 's,\($*\)\.o[:]*,\1.o $@:,g' < $@.$$$$ > $@; \
 	rm $@.$$$$
 
+
 clean:
 	$(RM) $(OBJS) $(DEPENDS) libtinyservice.so
+
+install:
+	-mkdir $(HEADER_DIR)
+	cp src/service.h src/json_service.h $(HEADER_DIR)
+	cp $(TARGET) /usr/local/lib/
+
+remove:
+	-rm -rf $(HEADER_DIR)
+	-rm /usr/local/lib/$(TARGET)
 
 fake:
 	echo $(OBJS)
